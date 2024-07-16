@@ -33,6 +33,29 @@ const JoinRoomPage = () => {
 
   return (
     <div className="h-[100vh] w-full flex items-center justify-center ">
+      <svg
+        aria-hidden="true"
+        class="pointer-events-none absolute inset-0 h-full w-full fill-gray-400/30 stroke-gray-400/30 [mask-image:linear-gradient(to_bottom_right,white,transparent,transparent)]"
+      >
+        <defs>
+          <pattern
+            id=":r29:"
+            width="20"
+            height="20"
+            patternUnits="userSpaceOnUse"
+            x="-1"
+            y="-1"
+          >
+            <path d="M.5 20V.5H20" fill="none" stroke-dasharray="0"></path>
+          </pattern>
+        </defs>
+        <rect
+          width="100%"
+          height="100%"
+          stroke-width="0"
+          fill="url(#:r29:)"
+        ></rect>
+      </svg>
       <MagicCard className="p-5 w-fit">
         <div className="w-[80vw] max-w-96">
           <h1 className="text-3xl font-bold">Join Room</h1>

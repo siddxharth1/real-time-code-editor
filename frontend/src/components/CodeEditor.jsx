@@ -5,6 +5,9 @@ import { Code_Snippets } from "../constants";
 import { Actions } from "../Action";
 import CodeOutput from "./CodeOutput";
 
+import SplitPane, { Pane } from "split-pane-react";
+import "split-pane-react/esm/themes/default.css";
+
 const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
   const [value, setValue] = useState(null);
   const [language, setLanguage] = useState({
@@ -51,29 +54,38 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange }) => {
   //     code: value,
   //   });
   // }
-
+  const [sizes, setSizes] = useState([400, "30%", "auto"]);
   return (
-    <div style={{ maxHeight: "100vh", padding: "10px" }}>
+    <div className="border-1 border-zinc-600 rounded-xl bg-neutral-900">
       <LanguageSelector
         language={language}
         onLanguageChange={onLanguageChange}
       />
-      <Editor
-        width={"80vw"}
-        height="80vh"
-        theme="vs-dark"
-        language={language?.language}
-        defaultValue={Code_Snippets[language?.language]}
-        value={value}
-        onMount={(editor, monaco) => {
-          editorRef.current = editor;
-          console.log(editor.getValue());
-        }}
-        // ref={editorRef}
-        forwardRef={editorRef}
-        onChange={handleEditorChange}
-      />
-      <CodeOutput editorRef={editorRef} language={language} />
+      <div className="h-[70vh]">
+        <SplitPane split="horizontal" sizes={sizes} onChange={setSizes}>
+          <Pane minSize={200}>
+            <Editor
+              height="80vh"
+              theme="vs-dark"
+              language={language?.language}
+              defaultValue={Code_Snippets[language?.language]}
+              value={value}
+              onMount={(editor, monaco) => {
+                editorRef.current = editor;
+                console.log(editor.getValue());
+              }}
+              // ref={editorRef}
+              forwardRef={editorRef}
+              onChange={handleEditorChange}
+            />
+          </Pane>
+          <Pane minSize={50}>
+            <div className="border-t-2 border-zinc-500 px-3 py-2">
+              <CodeOutput editorRef={editorRef} language={language} />
+            </div>
+          </Pane>
+        </SplitPane>
+      </div>
     </div>
   );
 };

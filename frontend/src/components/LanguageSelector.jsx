@@ -23,6 +23,7 @@ const LanguageSelector = ({
 
   return (
     <Autocomplete
+      size="sm"
       label="Language"
       placeholder="Search an language"
       defaultSelectedKey={JSON.stringify(language)}

@@ -114,21 +114,19 @@ const EditorPage = () => {
   }
 
   return (
-    <div className="p-5">
+    <div className="px-5 py-3 h-[100vh]">
       <h1 className="font-bold text-3xl">Code together</h1>
-      <Divider className="my-4" />
-      <aside className="">
+      <Divider className="my-3" />
+      <aside className="my-2">
         <div className="flex justify-between items-center">
           <div className="flex gap-5 items-center">
             <p className="font-semibold text-lg">Connected users: </p>
             <div>
               <AvatarGroup max={5}>
                 {clients.map((client) => (
-                  <>
-                    <Tooltip content={client.username}>
-                      <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
-                    </Tooltip>
-                  </>
+                  <Tooltip content={client.username} key={client.username}>
+                    <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
+                  </Tooltip>
                 ))}
               </AvatarGroup>
             </div>
@@ -140,11 +138,11 @@ const EditorPage = () => {
             </Button>
           </div>
         </div>
-        {/* <ChatBox
+        <ChatBox
           socketRef={socketRef}
           roomId={roomId}
           username={location.state?.username}
-        /> */}
+        />
       </aside>
       <main>
         <CodeEditor
