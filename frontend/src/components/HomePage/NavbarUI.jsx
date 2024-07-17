@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 
 const NavbarUI = () => {
   return (
-    <Navbar>
+    <Navbar isBordered className="bg-transparent">
       <NavbarBrand>
         <p className="font-bold text-inherit">ACME</p>
       </NavbarBrand>

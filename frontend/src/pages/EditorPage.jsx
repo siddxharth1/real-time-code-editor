@@ -17,12 +17,21 @@ import {
   Divider,
   Snippet,
   Tooltip,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  useDisclosure,
 } from "@nextui-org/react";
+import { IoClose } from "react-icons/io5";
+import { motion, AnimatePresence } from "framer-motion";
 
 const EditorPage = () => {
   const socketRef = useRef(null);
   const codeRef = useRef(null);
   const drawingBoardData = useRef(null);
+
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
   const location = useLocation();
   const reactNavigator = useNavigate();
@@ -38,6 +47,16 @@ const EditorPage = () => {
     setShowDrawingOverlay(true);
     setShowDrawingBoard(true);
   };
+
+  const handleOpen = (overlay) => {
+    if (overlay) {
+      setShowDrawingOverlay(true);
+    }
+    onOpen();
+  };
+  // const handleHideCanvas = () => {
+  //   setShowDrawingOverlay(false);
+  // };
 
   const handleShowDrawingBoard = () => {
     setShowDrawingBoard(true);
@@ -96,15 +115,6 @@ const EditorPage = () => {
     };
   }, []);
 
-  const copyRoomIdHandler = async () => {
-    try {
-      await navigator.clipboard.writeText(roomId);
-      window.alert("Room id copied to clipboard");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
   const leaveRoomHandler = () => {
     reactNavigator("/");
   };
@@ -115,14 +125,54 @@ const EditorPage = () => {
 
   return (
     <div className="px-5 py-3 h-[100vh]">
-      <h1 className="font-bold text-3xl">Code together</h1>
+      <div className="flex justify-between">
+        <h1 className="font-bold text-3xl">Code together</h1>
+        <div className="flex gap-5">
+          <Button onPress={handleShowOverlay}>Overlay</Button>
+          <Button onPress={handleShowDrawingBoard}>Draw Board</Button>
+        </div>
+      </div>
       <Divider className="my-3" />
       <aside className="my-2">
         <div className="flex justify-between items-center">
           <div className="flex gap-5 items-center">
             <p className="font-semibold text-lg">Connected users: </p>
             <div>
-              <AvatarGroup max={5}>
+              <Modal
+                className="dark text-white"
+                size={"sm"}
+                isOpen={isOpen}
+                onOpenChange={onOpenChange}
+              >
+                <ModalContent>
+                  {(onClose) => (
+                    <>
+                      <ModalHeader className="flex flex-col gap-1">
+                        Connected Users
+                      </ModalHeader>
+                      <ModalBody>
+                        {clients.map((client) => (
+                          <div
+                            key={client.socketId}
+                            className="flex items-center gap-3"
+                          >
+                            <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
+                            <p>{client.username}</p>
+                          </div>
+                        ))}
+                      </ModalBody>
+                    </>
+                  )}
+                </ModalContent>
+              </Modal>
+              <AvatarGroup
+                max={3}
+                renderCount={(count) => (
+                  <Button isIconOnly radius="full" onPress={onOpen}>
+                    {count}
+                  </Button>
+                )}
+              >
                 {clients.map((client) => (
                   <Tooltip content={client.username} key={client.username}>
                     <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
@@ -151,19 +201,39 @@ const EditorPage = () => {
           onCodeChange={(code) => (codeRef.current = code)}
         />
       </main>
+
       <div>
-        <button onClick={handleShowDrawingBoard}>Show Drawing Board</button>
-        <button onClick={handleShowOverlay}>Show OverLay</button>
-        <button onClick={handleHideCanvas}>Hide Canvas</button>
         {showDrawingBoard && (
-          <DrawingBoard
-            drawingBoardData={drawingBoardData}
-            showDrawingOverlay={showDrawingOverlay}
-          />
+          <Button
+            className="z-[9999] absolute top-4 right-28 border border-red-600"
+            isIconOnly
+            variant="light"
+            color="danger"
+            onClick={handleHideCanvas}
+            radius="full"
+          >
+            <IoClose />
+          </Button>
         )}
-        <button onClick={() => console.log(drawingBoardData.current)}>
+        <AnimatePresence>
+          {showDrawingBoard && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }} // Adjust duration as needed
+            >
+              <DrawingBoard
+                drawingBoardData={drawingBoardData}
+                showDrawingOverlay={showDrawingOverlay}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* <button onClick={() => console.log(drawingBoardData.current)}>
           Show drawingBoardData
-        </button>
+        </button> */}
       </div>
     </div>
   );

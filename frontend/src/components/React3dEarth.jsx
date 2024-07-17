@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Globe from "react-globe.gl";
 import Countrie from "./countries.json";
+import EarthBG from "../assets/bg.png";
 
 const React3dEarth = () => {
   const arcsData = [
@@ -99,27 +100,22 @@ const React3dEarth = () => {
     globeEl.current.controls().enableZoom = false;
     globeEl.current.controls().autoRotate = true;
     globeEl.current.controls().autoRotateSpeed = 2;
+
+    const camera = globeEl.current.camera();
+    camera.position.z = 330;
   }, []);
 
-  function getImageUrl(name) {
-    return new URL(`./${name}.png`, import.meta.url).href;
-  }
-
   return (
-    <div
-      style={{
-        width: "100%",
-        height: "100vh",
-        position: "absolute",
-        zIndex: "0",
-      }}
-    >
+    <div className="flex items-center relative">
+      <h1 className="text-8xl p-5 font-semibold bg-gradient-to-br bg-clip-text text-transparent from-white to-neutral-950">
+        Connect from any corner of the globe
+      </h1>
       <Globe
         ref={globeEl}
-        globeImageUrl={getImageUrl("bg")}
+        globeImageUrl={EarthBG}
         hexPolygonsData={Countrie.features}
         hexPolygonResolution={3}
-        hexPolygonMargin={0.5}
+        hexPolygonMargin={0.55}
         hexPolygonUseDots={true}
         hexPolygonColor={() => "gray"}
         arcsData={arcsData}
@@ -128,6 +124,7 @@ const React3dEarth = () => {
         arcDashInitialGap={() => Math.random() * 5}
         arcDashAnimateTime={1500}
         arcStroke={0.5}
+        backgroundColor="rgba(0, 0, 0, 0)"
         arcsTransitionDuration={1000}
         // arcColor={() => arcColors[Math.floor(Math.random() * arcColors.length)]}
         arcColor={() => "white"}
@@ -139,6 +136,8 @@ const React3dEarth = () => {
         pointAltitude={0}
         pointRadius={0.5}
         pointColor={() => "white"} // Color for the points (gold)
+        width={700}
+        height={600}
       />
     </div>
   );
