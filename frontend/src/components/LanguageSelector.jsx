@@ -12,6 +12,7 @@ const LanguageSelector = ({
   useEffect(() => {
     const getLanguagesHandler = async () => {
       const data = await getLanguages();
+      console.log(data);
       setLanguages(data);
     };
     getLanguagesHandler();

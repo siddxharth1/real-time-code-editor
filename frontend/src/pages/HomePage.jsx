@@ -1,12 +1,10 @@
 import React from "react";
 import NavbarUI from "../components/HomePage/NavbarUI";
 import React3dEarth from "../components/React3dEarth";
-import { Button, Divider, Input } from "@nextui-org/react";
-import AccordiansNext from "../components/AccordiansNext";
-import BackgroundBeams from "../components/BackgroundBeams";
 import BentoGrid from "../components/BentoGrid";
 import Suggestions from "../components/Suggestions";
 import HeroSection from "../components/HeroSection";
+import Footer from "../components/Footer";
 
 const HomePage = () => {
   return (
@@ -16,12 +14,19 @@ const HomePage = () => {
       <div className="mx-[7vw] font-sans">
         <HeroSection />
         <BentoGrid />
+        <br />
         <React3dEarth />
+        <br />
 
         <Suggestions />
       </div>
-      <div className="relative h-96">
-        <div className="absolute inset-0 -z-1 items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#391d86_100%)]"></div>
+      <div className="relative">
+        <div className="relative h-96">
+          <div className="absolute inset-0 -z-1 items-center px-5 py-24 [background:radial-gradient(125%_125%_at_50%_10%,#0A0A0A_40%,#391d86_100%)]"></div>
+        </div>
+        <div className="absolute bottom-[3vw] left-1/2 -translate-x-1/2">
+          <Footer />
+        </div>
       </div>
     </div>
   );

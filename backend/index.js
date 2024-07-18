@@ -71,6 +71,13 @@ io.on("connection", (socket) => {
   socket.on(Actions.SEND_CHAT, ({ roomId, message, username }) => {
     socket.in(roomId).emit(Actions.CHAT, { message, username });
   });
+
+  socket.on(Actions.CURSOR_CHANGE, ({ roomId, username, position }) => {
+    socket.in(roomId).emit(Actions.CURSOR_CHANGE, {
+      username,
+      position,
+    });
+  });
 });
 
 server.listen(3000, () => {

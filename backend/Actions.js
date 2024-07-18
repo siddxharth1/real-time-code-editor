@@ -7,6 +7,7 @@ const Actions = {
   LEAVE: "leave",
   SEND_CHAT: "send-chat",
   CHAT: "chat",
+  CURSOR_CHANGE: "cursor-change",
 };
 
 module.exports = Actions;
