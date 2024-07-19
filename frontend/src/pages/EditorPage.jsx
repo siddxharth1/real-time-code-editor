@@ -126,7 +126,7 @@ const EditorPage = () => {
   return (
     <div className="px-5 py-3 h-[100vh]">
       <div className="flex justify-between">
-        <h1 className="font-bold text-3xl">Code together</h1>
+        <h1 className="font-bold text-3xl">CodeBuddies</h1>
         <div className="flex gap-5">
           <Button onPress={handleShowOverlay}>Overlay</Button>
           <Button onPress={handleShowDrawingBoard}>Draw Board</Button>

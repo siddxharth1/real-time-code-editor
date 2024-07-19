@@ -12,7 +12,7 @@ const NavbarUI = () => {
   return (
     <Navbar isBordered className="bg-transparent">
       <NavbarBrand>
-        <p className="font-bold text-inherit">ACME</p>
+        <p className="font-bold text-inherit">CodeBuddies</p>
       </NavbarBrand>
       <NavbarContent justify="end">
         <NavbarItem>
