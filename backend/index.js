@@ -1,4 +1,5 @@
 const Actions = require("./Actions");
+require("dotenv").config();
 
 const express = require("express");
 const app = express();
@@ -80,6 +81,6 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(3000, () => {
-  console.log("Server is running on port 3000");
+server.listen(process.env.PORT, () => {
+  console.log("Server is running on port " + process.env.PORT);
 });
