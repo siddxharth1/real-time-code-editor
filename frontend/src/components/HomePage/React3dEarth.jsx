@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Globe from "react-globe.gl";
 import Countrie from "./countries.json";
-import EarthBG from "../assets/bg.png";
+import EarthBG from "../../assets/bg.png";
 
 const React3dEarth = () => {
   const arcsData = [

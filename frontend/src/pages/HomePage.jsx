@@ -1,10 +1,10 @@
 import React from "react";
 import NavbarUI from "../components/HomePage/NavbarUI";
-import React3dEarth from "../components/React3dEarth";
-import BentoGrid from "../components/BentoGrid";
-import Suggestions from "../components/Suggestions";
-import HeroSection from "../components/HeroSection";
-import Footer from "../components/Footer";
+import React3dEarth from "../components/HomePage/React3dEarth";
+import BentoGrid from "../components/HomePage/BentoGrid";
+import Suggestions from "../components/HomePage/Suggestions";
+import HeroSection from "../components/HomePage/HeroSection";
+import Footer from "../components/HomePage/Footer";
 
 const HomePage = () => {
   return (

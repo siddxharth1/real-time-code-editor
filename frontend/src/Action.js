@@ -8,4 +8,7 @@ export const Actions = {
   SEND_CHAT: "send-chat",
   CHAT: "chat",
   CURSOR_CHANGE: "cursor-change",
+  LANGUAGE_CHANGE: "language-change",
+  KICK_USER: "kick_user",
+  KICKED: "kicked",
 };
