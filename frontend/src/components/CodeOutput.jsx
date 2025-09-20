@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { executeCode } from "../api";
 import { Button } from "@nextui-org/react";
+import {addToast} from "@heroui/toast";
 
 const CodeOutput = ({ editorRef, language }) => {
   const [output, setOutput] = useState(null);
@@ -20,7 +21,11 @@ const CodeOutput = ({ editorRef, language }) => {
       setError(output.run.stderr ? true : false);
     } catch (error) {
       console.log(error);
-      window.alert("Error in running code");
+      addToast({
+        title: "Error in running code",
+        description: error.message,
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }

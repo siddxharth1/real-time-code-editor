@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Language_Versions } from "../constants";
 import { getLanguages } from "../api";
 import { Autocomplete, AutocompleteItem } from "@nextui-org/react";
-// const languages = Object.entries(Language_Versions);
 
 const LanguageSelector = ({
   language = { language: "javascript", version: "18.15.0" },
@@ -12,7 +10,6 @@ const LanguageSelector = ({
   useEffect(() => {
     const getLanguagesHandler = async () => {
       const data = await getLanguages();
-      console.log(data);
       setLanguages(data);
     };
     getLanguagesHandler();
@@ -27,9 +24,9 @@ const LanguageSelector = ({
       size="sm"
       label="Language"
       placeholder="Search an language"
-      defaultSelectedKey={JSON.stringify(language)}
       defaultItems={languages}
       allowsCustomValue={false}
+      selectedKey={JSON.stringify(language)}
       className="max-w-xs"
       onSelectionChange={onSelectionChange}
     >

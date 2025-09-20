@@ -1,4 +1,8 @@
 import { io } from "socket.io-client";
+/**
+ * Initializes and returns a socket.io client instance.
+ * Uses Vite environment variable `VITE_BACKEND_URL`.
+ */
 
 export const initSocket = async () => {
   const options = {
@@ -8,5 +12,5 @@ export const initSocket = async () => {
     transports: ["websocket"],
   };
 
-  return io("https://real-time-code-editor-2-9y27.onrender.com/", options);
+  return io(import.meta.env.VITE_BACKEND_URL, options);
 };

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import  { useEffect, useRef, useState } from "react";
 import {
   Navigate,
   useLocation,
@@ -10,6 +10,8 @@ import { initSocket } from "../socket";
 import { Actions } from "../Action";
 import ChatBox from "../components/ChatBox";
 import DrawingBoard from "./../components/DrawingBoard";
+import { FiLink } from "react-icons/fi";
+
 import {
   Avatar,
   AvatarGroup,
@@ -22,9 +24,11 @@ import {
   ModalHeader,
   ModalBody,
   useDisclosure,
+  Badge,
 } from "@nextui-org/react";
 import { IoClose } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
+import { addToast } from "@heroui/toast";
 
 const EditorPage = () => {
   const socketRef = useRef(null);
@@ -43,17 +47,20 @@ const EditorPage = () => {
   const [showDrawingBoard, setShowDrawingBoard] = useState(false);
   const [showDrawingOverlay, setShowDrawingOverlay] = useState(false);
 
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminInfo, setAdminInfo] = useState(null);
+
   const handleShowOverlay = () => {
     setShowDrawingOverlay(true);
     setShowDrawingBoard(true);
   };
 
-  const handleOpen = (overlay) => {
-    if (overlay) {
-      setShowDrawingOverlay(true);
-    }
-    onOpen();
-  };
+  // const handleOpen = (overlay) => {
+  //   if (overlay) {
+  //     setShowDrawingOverlay(true);
+  //   }
+  //   onOpen();
+  // };
   // const handleHideCanvas = () => {
   //   setShowDrawingOverlay(false);
   // };
@@ -72,6 +79,14 @@ const EditorPage = () => {
     reactNavigator("/");
   };
 
+  const handleKickUser = (socketId) => {
+    if (!isAdmin) return;
+    socketRef.current.emit(Actions.KICK_USER, {
+      roomId,
+      socketId,
+    });
+  };
+
   useEffect(() => {
     const init = async () => {
       socketRef.current = await initSocket();
@@ -81,29 +96,49 @@ const EditorPage = () => {
       socketRef.current.emit(Actions.JOIN, {
         roomId,
         username: location.state?.username,
+        isCreator: location.state?.isCreator,
+        deviceInfo: location.state?.deviceInfo
       });
 
-      socketRef.current.on(Actions.JOINED, (newClient) => {
-        setClients(newClient.clients);
-        if (newClient.socketId === socketRef.current.id) {
-          return;
+      socketRef.current.on(Actions.JOINED, (data) => {
+        setClients(data.clients);
+        setAdminInfo(data.admin);
+        // console.log()
+        // Check if current user is admin
+        if (data?.admin?.socketId === socketRef.current.id) {
+          setIsAdmin(true);
         }
-        console.log(newClient);
-        window.alert(`${newClient.username} joined the room`);
+
+        if (data.socketId === socketRef.current.id) return;
+        
+        console.log(data);
+        addToast({
+          title: `${data.username} joined the room`,
+        })
 
         socketRef.current.emit(Actions.SYNC_CODE, {
           code: codeRef.current,
-          newClientSocket: newClient.socketId,
+          newClientSocket: data.socketId,
         });
       });
 
       socketRef.current.on(Actions.DISCONNECTED, (clientDisconnected) => {
-        window.alert(`${clientDisconnected.username} left the room`);
+        console.log(clientDisconnected);
+        console.log(`${clientDisconnected.username} left the room`);
         setClients((prev) =>
           prev.filter(
             (client) => client.socketId !== clientDisconnected.socketId
           )
         );
+      });
+
+      socketRef.current.on(Actions.KICKED, () => {
+        
+        addToast({
+          title: "You have been kicked from the room by the admin",
+          type: "error",
+        });
+        reactNavigator("/");
       });
     };
     init();
@@ -112,6 +147,7 @@ const EditorPage = () => {
       socketRef.current.disconnect();
       socketRef.current.off(Actions.JOINED);
       socketRef.current.off(Actions.DISCONNECTED);
+      socketRef.current.off(Actions.KICKED);
     };
   }, []);
 
@@ -123,10 +159,24 @@ const EditorPage = () => {
     return <Navigate to="/" />;
   }
 
+  const handleLinkCopy = ()=>{
+    navigator.clipboard.writeText(`${window.location.origin}/join?roomId=${roomId}`);
+    addToast({
+      title: "Link copied to clipboard",
+      type: "success",
+    });
+  }
+
   return (
     <div className="px-5 py-3 h-[100vh]">
       <div className="flex justify-between">
         <h1 className="font-bold text-3xl">CodeBuddies</h1>
+        {isAdmin && (
+          <div className="flex items-center gap-2">
+            <Badge content="Admin" color="primary" />
+            {/* Add admin-only controls here */}
+          </div>
+        )}
         <div className="flex gap-5">
           <Button onPress={handleShowOverlay}>Overlay</Button>
           <Button onPress={handleShowDrawingBoard}>Draw Board</Button>
@@ -145,7 +195,7 @@ const EditorPage = () => {
                 onOpenChange={onOpenChange}
               >
                 <ModalContent>
-                  {(onClose) => (
+                  {() => (
                     <>
                       <ModalHeader className="flex flex-col gap-1">
                         Connected Users
@@ -154,10 +204,27 @@ const EditorPage = () => {
                         {clients.map((client) => (
                           <div
                             key={client.socketId}
-                            className="flex items-center gap-3"
+                            className="flex items-center justify-between gap-3"
                           >
-                            <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
-                            <p>{client.username}</p>
+                            <div className="flex items-center gap-3">
+                              <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
+                              <div>
+                                <p>{client.username}</p>
+                                {adminInfo?.socketId === client.socketId && (
+                                  <Badge content="Admin" color="primary" variant="flat" size="sm" />
+                                )}
+                              </div>
+                            </div>
+                            {isAdmin && client.socketId !== socketRef.current.id && (
+                              <Button 
+                                color="danger" 
+                                size="sm" 
+                                variant="flat"
+                                onClick={() => handleKickUser(client.socketId)}
+                              >
+                                Kick
+                              </Button>
+                            )}
                           </div>
                         ))}
                       </ModalBody>
@@ -175,7 +242,7 @@ const EditorPage = () => {
               >
                 {clients.map((client) => (
                   <Tooltip content={client.username} key={client.username}>
-                    <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
+                    <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d"  onClick={onOpen} />
                   </Tooltip>
                 ))}
               </AvatarGroup>
@@ -183,6 +250,9 @@ const EditorPage = () => {
           </div>
           <div className="flex gap-3">
             <Snippet symbol="Room id:">{roomId}</Snippet>
+            <Button onClick={handleLinkCopy} isIconOnly>
+            <FiLink />
+            </Button>
             <Button color="danger" onClick={leaveRoomHandler}>
               Leave room
             </Button>

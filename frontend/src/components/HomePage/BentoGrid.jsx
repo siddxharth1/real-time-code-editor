@@ -1,8 +1,8 @@
 import React from "react";
-import JoinRoom from "../assets/joinroom.png";
-import DrawBoard from "../assets/draw.png";
-import Chat from "../assets/chat.png";
-import Codepage from "../assets/codepage.png";
+import JoinRoom from "../../assets/joinroom.png";
+import DrawBoard from "../../assets/draw.png";
+import Chat from "../../assets/chat.png";
+import Codepage from "../../assets/codepage.png";
 import GridPattern from "./GridPattern";
 
 const BentoGrid = () => {

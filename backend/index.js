@@ -1,86 +1,29 @@
-const Actions = require("./Actions");
 require("dotenv").config();
-
-const express = require("express");
-const app = express();
-
 const http = require("http");
+const { Server } = require("socket.io");
+const express = require("express");
+
+const socketController = require("./socketController");
+const redis = require("./services/redis");
+const { createAdapter } = require("@socket.io/redis-streams-adapter");
+
+const app = express();
 const server = http.createServer(app);
 
-const { Server } = require("socket.io");
-const io = new Server(server);
+const port = process.env.PORT || 3001;
 
-const userSocketMap = {};
-const getAllConnectedClients = (roomId) => {
-  return Array.from(io.sockets.adapter.rooms.get(roomId) || []).map(
-    (socketId) => {
-      return {
-        socketId,
-        username: userSocketMap[socketId],
-      };
-    }
-  );
-};
-
-io.on("connection", (socket) => {
-  console.log("socket connected", socket.id);
-
-  socket.on(Actions.JOIN, ({ roomId, username }) => {
-    userSocketMap[socket.id] = username;
-    socket.join(roomId);
-    const clients = getAllConnectedClients(roomId);
-    console.log(clients);
-
-    //sending the message to each client individually
-    clients.forEach((client) => {
-      io.to(client.socketId).emit(Actions.JOINED, {
-        clients,
-        username,
-        socketId: socket.id,
-      });
-    });
-
-    //attempting to broadcast a message to all clients in the room except the sender
-    // socket.in(roomId).emit(Actions.JOINED, {
-    //   clients: getAllConnectedClients(roomId),
-    //   username,
-    //   socketId: socket.id,
-    // });
-  });
-
-  socket.on("disconnecting", () => {
-    const rooms = [...socket.rooms];
-    rooms.forEach((roomId) => {
-      socket.in(roomId).emit(Actions.DISCONNECTED, {
-        socketId: socket.id,
-        username: userSocketMap[socket.id],
-      });
-    });
-
-    delete userSocketMap[socket.id];
-    socket.leaveAll();
-  });
-
-  socket.on(Actions.CODE_CHANGE, ({ roomId, code }) => {
-    socket.in(roomId).emit(Actions.CODE_CHANGE, { code });
-  });
-
-  socket.on(Actions.SYNC_CODE, ({ code, newClientSocket }) => {
-    io.to(newClientSocket).emit(Actions.CODE_CHANGE, { code });
-  });
-
-  socket.on(Actions.SEND_CHAT, ({ roomId, message, username }) => {
-    socket.in(roomId).emit(Actions.CHAT, { message, username });
-  });
-
-  socket.on(Actions.CURSOR_CHANGE, ({ roomId, username, position }) => {
-    socket.in(roomId).emit(Actions.CURSOR_CHANGE, {
-      username,
-      position,
-    });
-  });
+const io = new Server(server, {
+  adapter: createAdapter(redis),
 });
 
-server.listen(process.env.PORT, () => {
-  console.log("Server is running on port " + process.env.PORT);
+socketController(io);
+
+// Log Redis connection for main Redis client
+redis.on("connect", async () => {
+  console.log(`Connected to Redis from ${port}`);
+});
+
+// Start server
+server.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });

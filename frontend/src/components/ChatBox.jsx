@@ -21,7 +21,7 @@ const ChatBox = ({ socketRef, roomId, username }) => {
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.on(Actions.CHAT, (message) => {
-        console.log(message);
+        // console.log(message);
         // setMessages([...messages, message]);
         setMessages((prev) => [...prev, message]);
       });

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import LanguageSelector from "./LanguageSelector";
 import { Code_Snippets } from "../constants";
@@ -9,6 +9,7 @@ import SplitPane, { Pane } from "split-pane-react";
 import "split-pane-react/esm/themes/default.css";
 import { Button } from "@nextui-org/react";
 import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
+import { IoCodeDownloadOutline } from "react-icons/io5";
 
 const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
   const [value, setValue] = useState(null);
@@ -33,11 +34,17 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
       socketRef.current.on(Actions.CURSOR_CHANGE, ({ username, position }) => {
         setRemoteCursors((prev) => ({ ...prev, [username]: position }));
       });
+
+      socketRef.current.on(Actions.LANGUAGE_CHANGE, ({ language }) => {
+        setLanguage(language);
+        setValue(Code_Snippets[language?.language] || "");
+      });
     }
 
     return () => {
       socketRef.current.off(Actions.CODE_CHANGE);
       socketRef.current.off(Actions.CURSOR_CHANGE);
+      socketRef.current.off(Actions.LANGUAGE_CHANGE);
     };
   }, [socketRef.current]);
 
@@ -72,21 +79,41 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
     }
   }, [remoteCursors]);
 
+  useEffect(() => {
+    let timer;
+
+    timer = setTimeout(() => {
+      onCodeChange(value);
+      socketRef.current.emit(Actions.CODE_CHANGE, {
+        roomId,
+        code: value,
+      });
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+    };
+  }, [value]);
+
   const onLanguageChange = (language) => {
     setLanguage(language);
     setValue(Code_Snippets[language?.language] || "");
-  };
-
-  const handleEditorChange = (value, event) => {
-    console.log("event", event);
-    console.log("value", value);
-    onCodeChange(value);
-
-    socketRef.current.emit(Actions.CODE_CHANGE, {
+    socketRef.current.emit(Actions.LANGUAGE_CHANGE, {
       roomId,
-      code: value,
+      language,
     });
   };
+
+  // const handleEditorChange = (value, event) => {
+  //   console.log("event", event);
+  //   console.log("value", value);
+  //   onCodeChange(value);
+
+  //   socketRef.current.emit(Actions.CODE_CHANGE, {
+  //     roomId,
+  //     code: value,
+  //   });
+  // };
 
   const handleCursorChange = (e) => {
     const position = editorRef.current.getPosition();
@@ -109,6 +136,16 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
   };
 
   const [sizes, setSizes] = useState([400, "30%", "auto"]);
+
+  const handleDownloadCode = ()=>{
+    const code = editorRef.current.getValue();
+    const blob = new Blob([code], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "code.txt";
+    a.click();
+  }
   return (
     <div className="border-1 border-zinc-600 rounded-xl bg-neutral-900">
       <div className="p-2 flex justify-between">
@@ -117,6 +154,11 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
           onLanguageChange={onLanguageChange}
         />
         <div>
+          <Button isIconOnly
+            onClick={handleDownloadCode}
+          >
+            <IoCodeDownloadOutline />
+          </Button>
           <Button isIconOnly onClick={handleFullScreen}>
             {isFullScreen ? <RxExitFullScreen /> : <RxEnterFullScreen />}
           </Button>
@@ -134,10 +176,12 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
               onMount={(editor, monaco) => {
                 editorRef.current = editor;
                 monacoRef.current = monaco;
-                console.log(editor.getValue());
                 editor.onDidChangeCursorPosition(handleCursorChange);
               }}
-              onChange={handleEditorChange}
+              // onChange={handleEditorChange}
+              onChange={(value, event) => {
+                setValue(value);
+              }}
             />
           </Pane>
           <Pane minSize={50}>
