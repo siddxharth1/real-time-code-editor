@@ -13,10 +13,10 @@ const socketController = (io) => {
       // Store user info
       redis.hset("userToUsernameMap", socket.id, username);
       redis.sadd(`rooms:${roomId}`, socket.id);
-      
+
       // Check if room already has an admin
       const existingAdminData = await redis.hget(`room:${roomId}:admin`, "info");
-      
+
       // If user is creator and no admin exists, make them admin
       if (isCreator && !existingAdminData) {
         const adminInfo = {
@@ -25,6 +25,7 @@ const socketController = (io) => {
           deviceInfo
         };
         await redis.hset(`room:${roomId}:admin`, "info", JSON.stringify(adminInfo));
+        await redis.hset(`room:${roomId}:files`, "main.js", "");
         // console.log(`Set ${username} as admin for room ${roomId}`);
       }
 
@@ -56,10 +57,10 @@ const socketController = (io) => {
         if (admin?.socketId === socket.id) {
           // Clear admin for this room
           await redis.hdel(`room:${roomId}:admin`, "info");
-          
+
           // Get remaining clients
           const remainingClients = await getAllConnectedClients(roomId, io);
-          
+
           // If there are other clients, make the first one admin
           if (remainingClients.length > 0) {
             const newAdmin = remainingClients[0];
@@ -69,7 +70,7 @@ const socketController = (io) => {
               deviceInfo: null
             };
             await redis.hset(`room:${roomId}:admin`, "info", JSON.stringify(newAdminInfo));
-            
+
             // Notify room about new admin
             io.to(roomId).emit(Actions.JOINED, {
               clients: remainingClients,
@@ -90,13 +91,40 @@ const socketController = (io) => {
       socket.leaveAll();
     });
 
-    socket.on(Actions.CODE_CHANGE, ({ roomId, code }) => {
-      socket.in(roomId).emit(Actions.CODE_CHANGE, { code });
+    socket.on(Actions.CODE_CHANGE, async ({ roomId, code, file }) => {
+      await redis.hset(`room:${roomId}:files`, file, code);
+      socket.in(roomId).emit(Actions.CODE_CHANGE, { code, file });
     });
 
     socket.on(Actions.SYNC_CODE, ({ code, newClientSocket }) => {
       io.to(newClientSocket).emit(Actions.CODE_CHANGE, { code });
     });
+
+    socket.on(Actions.FILE.SYNC, async ({ newClientSocket }) => {
+      const files = await redis.hgetall(`room:${roomId}:files`);
+      io.to(newClientSocket).emit(Actions.CODE_CHANGE, files);
+    });
+
+    socket.on(Actions.FILE.ADD, async ({ roomId, file }) => {
+      await redis.hset(`room:${roomId}:files`, file, "");
+      const files = await redis.hgetall(`room:${roomId}:files`)
+      socket.in(roomId).emit(Actions.FILE.SYNC, files)
+    })
+
+    socket.on(Actions.FILE.DELETE, async ({ roomId, file }) => {
+      await redis.hdel(`room:${roomId}:files`, file, "");
+      const files = await redis.hgetall(`room:${roomId}:files`)
+      socket.in(roomId).emit(Actions.FILE.SYNC, files)
+    })
+
+    socket.on(Actions.FILE.RENAME, async ({ roomId, oldFile, newFile }) => {
+      const content = await redis.hget(`room:${roomId}:files`, oldFile)
+      await redis.hdel(`room:${roomId}:files`, oldFile)
+      await redis.hset(`room:${roomId}:files`, newFile, content);
+
+      const files = await redis.hgetall(`room:${roomId}:files`)
+      socket.in(roomId).emit(Actions.FILE.SYNC, files)
+    })
 
     socket.on(Actions.SEND_CHAT, ({ roomId, message, username }) => {
       socket.in(roomId).emit(Actions.CHAT, { message, username });
@@ -118,32 +146,32 @@ const socketController = (io) => {
       // Verify the sender is admin
       const adminData = await redis.hget(`room:${roomId}:admin`, "info");
       const admin = adminData ? JSON.parse(adminData) : null;
-      
+
       if (admin?.socketId === socket.id) {
         // Get the username of the kicked user
         const username = await getUsernameFromSocketId(socketId);
-        
+
         // Emit kick event to the specific user
         io.to(socketId).emit(Actions.KICKED);
-        
+
         // Remove user from room in Redis
         await redis.srem(`rooms:${roomId}`, socketId);
-        
+
         // Remove user from room
         const kickedSocket = io.sockets.sockets.get(socketId);
         if (kickedSocket) {
           kickedSocket.leave(roomId);
         }
-        
+
         // Notify other clients about the disconnection
         io.to(roomId).emit(Actions.DISCONNECTED, {
           socketId,
           username,
         });
-        
+
         // Get updated client list after kick
         const updatedClients = await getAllConnectedClients(roomId, io);
-        
+
         // Send updated client list to all remaining users
         io.to(roomId).emit(Actions.JOINED, {
           clients: updatedClients,
@@ -151,7 +179,7 @@ const socketController = (io) => {
           username: "System",
           socketId: "system"
         });
-        
+
         // console.log(`User ${username} (${socketId}) was kicked from room ${roomId}`);
       } else {
         // console.log(`Unauthorized kick attempt from ${socket.id} in room ${roomId}`);
