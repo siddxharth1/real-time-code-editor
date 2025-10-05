@@ -6,9 +6,11 @@ At a glance
 
 - backend/: Node.js + Express + Socket.IO server and Redis integration
 - frontend/: React + Vite client, UI components, pages, and socket client
+- shared/: Common code used by both backend and frontend (e.g., shared/actions.js)
 - README.md: Setup, run instructions, and general usage
 - CONTRIBUTING.md: Contribution workflow, branch/commit policies, PR checklist
 - CODE_STRUCTURE.md: You are here — architectural map of the repo
+ - package.json (root): Monorepo manager using npm workspaces
 
 ## Top-level directories
 
@@ -45,6 +47,24 @@ frontend/
 - vite.config.js: Vite build/dev config
 - tailwind.config.js, postcss.config.js: Styling pipeline config
 - package.json: Scripts and dependencies for the frontend
+
+## Monorepo & npm workspaces
+
+This repository is an npm workspaces monorepo. The root `package.json` declares two workspaces and orchestrates dev scripts:
+
+- workspaces: ["backend", "frontend"]
+- Root scripts:
+  - `npm run dev`: Starts both backend and frontend concurrently
+  - `npm run dev:backend`: Starts only the backend workspace
+  - `npm run dev:frontend`: Starts only the frontend workspace
+
+Tips for workspace-aware commands:
+
+- Run a script in a specific workspace: `npm run -w backend dev`
+- Install a dependency in a workspace: `npm i -w frontend <pkg>`
+- Install devDependency in a workspace: `npm i -D -w backend <pkg>`
+
+Note: The `shared/` folder is not a separate workspace; it contains common code (like `shared/actions.js`) consumed by both backend and frontend via relative import (backend) or Vite alias (frontend).
 
 ## How the app works (data flow)
 
@@ -117,6 +137,11 @@ Frontend
 See README for sample `.env` values and platform-specific setup.
 
 ## NPM scripts
+
+Root (monorepo)
+- npm run dev: start backend and frontend together (uses concurrently)
+- npm run dev:backend: start only backend
+- npm run dev:frontend: start only frontend
 
 Backend (in `backend/package.json`)
 - npm run dev: start server with nodemon
