@@ -1,40 +1,23 @@
 # Real-Time Code Editor
 
-A collaborative real-time code editor that enables multiple users to code together simultaneously. Built with React, Node.js, Socket.IO, and Redis for real-time synchronization.
+A collaborative real-time code editor that enables multiple users to code together simultaneously.
 
 ## ✨ Features
 
-- **Real-time Collaboration**: Multiple users can edit code simultaneously with live cursor tracking
-- **Multi-language Support**: Code in various programming languages with syntax highlighting
-- **Integrated Chat**: Built-in chat system for team communication
-- **Drawing Board**: Collaborative whiteboard for brainstorming and diagramming
+- **Real-time Collaboration**: Multi-user editing with live cursor tracking
+- **Multi-language Support**: Syntax highlighting for various programming languages
 - **Code Execution**: Run and test code directly in the browser
-- **Language Selection**: Support for multiple programming languages
-- **Room-based Sessions**: Create or join coding rooms with unique room IDs
-- **User Presence**: See who's online and active in your coding session
-- **Modern UI**: Beautiful, responsive interface built with NextUI and Tailwind CSS
+- **Integrated Chat**: Built-in team communication
+- **Drawing Board**: Collaborative whiteboard for brainstorming
+- **Room-based Sessions**: Create/join coding rooms with unique IDs
+- **User Presence**: See who's online and active
+- **Modern UI**: Responsive interface with NextUI and Tailwind CSS
 
 ## 🛠️ Tech Stack
 
-### Frontend
+**Frontend**: React 18, Vite, Socket.IO Client, Monaco Editor, NextUI, Tailwind CSS, Framer Motion, React Router, Excalidraw
 
-- **React 18** - Modern React with hooks
-- **Vite** - Fast build tool and development server
-- **Socket.IO Client** - Real-time bidirectional communication
-- **Monaco Editor** - VS Code editor component
-- **NextUI** - Modern React UI library
-- **Tailwind CSS** - Utility-first CSS framework
-- **Framer Motion** - Animation library
-- **React Router** - Client-side routing
-- **Excalidraw** - Collaborative drawing component
-
-### Backend
-
-- **Node.js** - JavaScript runtime
-- **Express.js** - Web framework
-- **Socket.IO** - Real-time communication
-- **Redis** - In-memory data store for scaling
-- **Redis Streams Adapter** - Socket.IO scaling with Redis
+**Backend**: Node.js, Express.js, Socket.IO, Redis, Redis Streams Adapter
 
 ## 📋 Prerequisites
 
@@ -68,9 +51,6 @@ cp .env.example .env
 ```
 
 #### Configure Backend Environment Variables
-
-Edit the `.env` file in the backend directory:
-
 ```env
 PORT=3000
 REDIS_URL="redis://default:your_redis_password@localhost:6379"
@@ -206,81 +186,6 @@ npm run preview
    - Start coding with real-time collaboration
    - Use the integrated chat for communication
    - Access the drawing board for brainstorming
-
-## 📁 Project Structure
-
-```
-real-time-code-editor/
-├── backend/
-│   ├── services/
-│   │   └── redis.js          # Redis configuration
-│   ├── Actions.js            # Socket action constants
-│   ├── getAllConnectedClients.js
-│   ├── index.js              # Main server file
-│   ├── socketController.js   # Socket.IO event handlers
-│   ├── package.json
-│   └── .env.example
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── ChatBox.jsx   # Real-time chat component
-│   │   │   ├── CodeEditor.jsx # Monaco editor wrapper
-│   │   │   ├── CodeOutput.jsx # Code execution output
-│   │   │   ├── DrawingBoard.jsx # Collaborative drawing
-│   │   │   └── LanguageSelector.jsx
-│   │   ├── pages/
-│   │   │   ├── HomePage.jsx   # Landing page
-│   │   │   ├── JoinRoomPage.jsx # Room joining interface
-│   │   │   └── EditorPage.jsx # Main editor interface
-│   │   ├── App.jsx
-│   │   ├── socket.js         # Socket.IO client setup
-│   │   └── constants.js
-│   ├── package.json
-│   └── .env.example
-└── README.md
-```
-
-## 🔧 Environment Variables
-
-### Backend (.env)
-
-| Variable    | Description          | Default                  |
-| ----------- | -------------------- | ------------------------ |
-| `PORT`      | Server port          | `3000`                   |
-| `REDIS_URL` | Redis connection URL | `redis://localhost:6379` |
-
-### Frontend (.env)
-
-| Variable           | Description        | Default                 |
-| ------------------ | ------------------ | ----------------------- |
-| `VITE_BACKEND_URL` | Backend server URL | `http://localhost:3000` |
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **Redis Connection Error**
-
-   - Ensure Redis server is running
-   - Check Redis URL in backend `.env` file
-   - Verify Redis authentication credentials
-
-2. **Frontend Can't Connect to Backend**
-
-   - Verify backend server is running on the correct port
-   - Check `VITE_BACKEND_URL` in frontend `.env` file
-   - Ensure no firewall blocking the connection
-
-3. **Real-time Features Not Working**
-
-   - Check browser console for WebSocket connection errors
-   - Verify Socket.IO client version compatibility
-   - Ensure Redis is properly connected
-
-4. **Module Not Found Errors**
-   - Delete `node_modules` and `package-lock.json`
-   - Run `npm install` again
-   - Clear npm cache: `npm cache clean --force`
 
 ## 🤝 Contributing
 
