@@ -15,7 +15,6 @@ At a glance
 backend/
 - index.js: App entry — HTTP server + Socket.IO + Redis adapter wiring
 - socketController.js: Socket.IO event handling and room/user lifecycle
-- Actions.js: Server-side action/event name constants
 - getAllConnectedClients.js: Utility to list connected clients in a room
 - services/redis.js: Redis client setup (ioredis)
 - package.json: Scripts and dependencies for the backend
@@ -26,7 +25,7 @@ frontend/
 - src/: Application source
   - main.jsx: App bootstrap (React root, router, providers)
   - App.jsx, App.css: Top-level app component and styles
-  - Action.js: Frontend socket action/event constants
+  - Action.js: (legacy) Replaced by shared/actions.js
   - api.js: API helper(s) (HTTP calls if any)
   - constants.js: Shared frontend constants
   - socket.js: Socket.IO client initialization and helpers
@@ -74,7 +73,7 @@ frontend/
 
 ## Socket events (Actions)
 
-Common events used by both client and server. Keep `frontend/src/Action.js` and `backend/Actions.js` in sync.
+Common events used by both client and server are defined once in `shared/actions.js`.
 
 - JOIN: client announces it wants to join a room
 - JOINED: server broadcasts updated client list and admin info
@@ -88,7 +87,10 @@ Common events used by both client and server. Keep `frontend/src/Action.js` and 
 - KICK_USER: admin-only action to remove a user from the room
 - KICKED: targeted event to the removed user
 
-Tip: Always keep string values identical in frontend and backend Action(s) files.
+Tip: Import actions from the shared module:
+
+- Backend (CJS): `const Actions = require('../shared/actions');`
+- Frontend (ESM via Vite alias): `import { Actions } from '@shared/actions';`
 
 ## Redis data model (server)
 
@@ -128,7 +130,7 @@ Frontend (in `frontend/package.json`)
 
 ## Where to add new code
 
-- New socket events: add constants in both `frontend/src/Action.js` and `backend/Actions.js`; implement handling in `backend/socketController.js` and emit/listen in frontend components or pages.
+- New socket events: add constants in `shared/actions.js` only; implement handling in `backend/socketController.js` and emit/listen in frontend components or pages.
 - New UI features: create components under `frontend/src/components/`, wire into pages in `frontend/src/pages/`.
 - New API endpoints (if you add HTTP routes): define Express routes in `backend/` (you can add a `routes/` folder) and call them from `frontend/src/api.js`.
 - Shared constants/types: keep frontend constants in `frontend/src/constants.js`; mirror necessary server-side values on the backend.

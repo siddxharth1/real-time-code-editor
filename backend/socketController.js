@@ -1,4 +1,4 @@
-const Actions = require("./Actions");
+const Actions = require("../shared/actions");
 const getAllConnectedClients = require("./getAllConnectedClients");
 const redis = require("./services/redis");
 

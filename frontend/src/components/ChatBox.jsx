@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Actions } from "../Action";
+import { Actions } from "@shared/actions";
 import {
   Badge,
   Button,

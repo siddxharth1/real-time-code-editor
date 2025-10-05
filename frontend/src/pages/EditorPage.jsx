@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import CodeEditor from "../components/CodeEditor";
 import { initSocket } from "../socket";
-import { Actions } from "../Action";
+import { Actions } from "@shared/actions";
 import ChatBox from "../components/ChatBox";
 import DrawingBoard from "./../components/DrawingBoard";
 import { FiLink } from "react-icons/fi";
