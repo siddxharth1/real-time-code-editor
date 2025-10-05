@@ -1,4 +1,4 @@
-const redis = require("./services/redis");
+import redis from "./services/redis.js";
 
 const getUsernameFromSocketId = async (socketId) => {
   return await redis.hget("userToUsernameMap", socketId);
@@ -23,4 +23,4 @@ const getAllConnectedClients = async (roomId, io) => {
   return clients;
 };
 
-module.exports = getAllConnectedClients;
+export default getAllConnectedClients;

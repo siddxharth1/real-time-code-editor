@@ -1,0 +1,14 @@
+{
+  "name": "real-time-code-editor-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": ["backend", "frontend"],
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run -w backend dev\" \"npm run -w frontend dev\"",
+    "dev:backend": "npm run -w backend dev",
+    "dev:frontend": "npm run -w frontend dev"
+  },
+  "devDependencies": {
+    "concurrently": "^9.0.1"
+  }
+}

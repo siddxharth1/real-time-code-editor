@@ -1,6 +1,6 @@
-const Actions = require("../shared/actions");
-const getAllConnectedClients = require("./getAllConnectedClients");
-const redis = require("./services/redis");
+import Actions from "../shared/actions.js";
+import getAllConnectedClients from "./getAllConnectedClients.js";
+import redis from "./services/redis.js";
 
 const getUsernameFromSocketId = async (socketId) => {
   return await redis.hget("userToUsernameMap", socketId);
@@ -160,4 +160,4 @@ const socketController = (io) => {
   });
 };
 
-module.exports = socketController;
+export default socketController;

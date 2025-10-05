@@ -1,9 +1,8 @@
-// Shared actions contract used by both backend (Node.js CJS) and frontend (Vite ESM)
-// Export pattern supports:
-// - CommonJS: const Actions = require('../shared/actions');
-// - ESM via Vite CJS interop: import { Actions } from '@shared/actions';
+// Shared actions contract used by both backend and frontend (ESM)
+// Usage:
+// - ESM: import Actions, { Actions as ActionsNamed } from '../shared/actions.js';
 
-const Actions = {
+export const Actions = {
   JOIN: "join",
   JOINED: "joined",
   DISCONNECTED: "disconnected",
@@ -18,8 +17,4 @@ const Actions = {
   KICK_USER: "kick_user",
   KICKED: "kicked",
 };
-
-// CommonJS default export
-module.exports = Actions;
-// Also expose a named export for better ESM interop in bundlers like Vite
-module.exports.Actions = Actions;
+export default Actions;

@@ -128,6 +128,21 @@ docker run -d --name redis-server -p 6379:6379 redis:latest redis-server --requi
 
 ### Development Mode
 
+#### One command (recommended)
+
+From the repository root, install and run both servers together:
+
+```bash
+npm install
+npm run dev
+```
+
+This starts:
+- Backend on http://localhost:3000
+- Frontend on http://localhost:5173
+
+If you'd like to run them separately, see the steps below.
+
 #### 1. Start Redis
 
 Make sure Redis is running.

@@ -1,1 +1,1 @@
-export { Actions } from "@shared/actions";
+export { default as Actions } from "@shared/actions";

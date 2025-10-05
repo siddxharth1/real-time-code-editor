@@ -1,2 +1,3 @@
-// Re-export from shared for backward compatibility if imported elsewhere
-module.exports = require("../shared/actions");
+// ESM-compatible re-export for backward compatibility if imported elsewhere
+export { default } from "../shared/actions.js";
+export { Actions } from "../shared/actions.js";

@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import LanguageSelector from "./LanguageSelector";
 import { Code_Snippets } from "../constants";
-import { Actions } from "@shared/actions";
+import Actions from "@shared/actions";
 import CodeOutput from "./CodeOutput";
 
 import SplitPane, { Pane } from "split-pane-react";
