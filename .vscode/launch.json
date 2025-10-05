@@ -1,0 +1,50 @@
+{
+  "$schema": "vscode://schemas/launch",
+  "version": "0.2.0",
+  "compounds": [
+    {
+      "name": "Dev: Backend + Frontend",
+      "configurations": [
+        "Launch Dev (concurrently)",
+        "Debug Backend (Attach)",
+        "Debug Frontend (Chrome)"
+      ]
+    }
+  ],
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Launch Dev (concurrently)",
+      "runtimeExecutable": "npm",
+      "env": {
+        "NODE_OPTIONS": "--inspect=9229"
+      },
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "Debug Frontend (Chrome)",
+      "url": "http://localhost:5173",
+      "webRoot": "${workspaceFolder}/frontend",
+      
+      "sourceMaps": true
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Debug Backend (Attach)",
+      "port": 9229,
+      "restart": true,
+      "timeout": 30000,
+      "autoAttachChildProcesses": true,
+      "skipFiles": ["<node_internals>/**"]
+    }
+  ]
+}
