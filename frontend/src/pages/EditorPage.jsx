@@ -38,7 +38,7 @@ const EditorPage = () => {
   const drawingBoardData = useRef(null);
 
   const [files, setFiles] = useState([])
-  const [currFile, setCurrFile] = useState("")
+  const [currFile, setCurrFile] = useState("main.js")
   const [code, setCode] = useState("");
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
@@ -122,13 +122,8 @@ const EditorPage = () => {
       })
 
       socketRef.current.on(Actions.FILE.OPEN, ({ file, code }) => {
-        setCode(code)
         setCurrFile(file)
-      })
-
-      socketRef.current.emit(Actions.FILE.SYNC, {
-        newClientSocket: socketRef.current.id,
-        roomId
+        setCode(code ?? "")
       })
 
       socketRef.current.on(Actions.JOINED, (data) => {
@@ -182,6 +177,8 @@ const EditorPage = () => {
       socketRef.current.off(Actions.FILE.SYNC);
     };
   }, []);
+
+  console.log(currFile)
 
   const leaveRoomHandler = () => {
     reactNavigator("/");
@@ -316,6 +313,7 @@ const EditorPage = () => {
           {
             files.map((file) => (
               <div key={file} className={`m-0 flex items-center justify-between cursor-pointer ${file === currFile ? "bg-white/20" : "bg-white/10"} p-2 rounded hover:bg-white/20 transition-colors duration-300`} onClick={() => {
+                setCurrFile(file)
                 socketRef.current.emit(Actions.FILE.OPEN, {
                   file,
                   roomId
@@ -332,7 +330,7 @@ const EditorPage = () => {
           roomId={roomId}
           onCodeChange={(code) => (codeRef.current = code)}
           username={location.state?.username}
-          currFile={currFile}
+          currFile={currFile != "" ? currFile : "main.js"}
           defaultValue={code || ""}
         />
       </main>

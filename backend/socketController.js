@@ -117,7 +117,7 @@ const socketController = (io) => {
 
     socket.on(Actions.FILE.OPEN, async ({ roomId, file }) => {
       const code = await redis.hget(`room:${roomId}:files`, file)
-      socket.emit(Actions.FILE.OPEN, { code, file })
+      io.to(socket.id).emit(Actions.FILE.OPEN, { code, file })
     })
 
     socket.on(Actions.FILE.DELETE, async ({ roomId, file }) => {

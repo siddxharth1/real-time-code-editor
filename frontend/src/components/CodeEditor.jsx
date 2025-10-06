@@ -22,16 +22,25 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username, currFile, defau
   const decorationsRef = useRef([]);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
+  const currFileRef = useRef(currFile);
+  const valueRef = useRef(value);
+
+  useEffect(() => { currFileRef.current = currFile; }, [currFile]);
+  useEffect(() => { valueRef.current = value; }, [value]);
+
   useEffect(() => {
     setValue(defaultValue)
   }, [defaultValue, currFile])
 
+  console.log(currFile, "currFile in editor")
+
   useEffect(() => {
     if (socketRef.current) {
       socketRef.current.on(Actions.CODE_CHANGE, ({ code, file }) => {
+        console.log("CODE CHANGE Incoming", currFile);
         if (code === null) return;
-        if (code === value) return;
-        if (file !== currFile) return;
+        if (code === valueRef.current) return;
+        if (file !== currFileRef.current) return;
         setValue(code);
       });
 
@@ -90,22 +99,23 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username, currFile, defau
   }, [remoteCursors]);
 
   useEffect(() => {
-    let timer;
+    if (!socketRef.current) return;
+    if (!currFile) return; // don't emit if file is empty
 
-    timer = setTimeout(() => {
+    const id = setTimeout(() => {
       onCodeChange(value);
-      if (currFile == "") return
+      // double-check current file ref before emitting
+      const current = currFileRef.current;
+      if (!current) return;
       socketRef.current.emit(Actions.CODE_CHANGE, {
         roomId,
         code: value,
-        file: currFile
+        file: current,
       });
     }, 300);
 
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [value]);
+    return () => clearTimeout(id);
+  }, [value, currFile, roomId, onCodeChange, socketRef]);
 
   const onLanguageChange = (language) => {
     setLanguage(language);
