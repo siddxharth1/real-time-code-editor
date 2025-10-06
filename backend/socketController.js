@@ -92,6 +92,10 @@ const socketController = (io) => {
     });
 
     socket.on(Actions.CODE_CHANGE, async ({ roomId, code, file }) => {
+      const files = await redis.hgetall(`room:${roomId}:files`);
+      if (files[file] === undefined) {
+        return;
+      }
       await redis.hset(`room:${roomId}:files`, file, code);
       socket.in(roomId).emit(Actions.CODE_CHANGE, { code, file });
     });
@@ -100,30 +104,26 @@ const socketController = (io) => {
       io.to(newClientSocket).emit(Actions.CODE_CHANGE, { code });
     });
 
-    socket.on(Actions.FILE.SYNC, async ({ newClientSocket }) => {
+    socket.on(Actions.FILE.SYNC, async ({ newClientSocket, roomId }) => {
       const files = await redis.hgetall(`room:${roomId}:files`);
-      io.to(newClientSocket).emit(Actions.CODE_CHANGE, files);
+      io.to(newClientSocket).emit(Actions.FILE.SYNC, Object.keys(files));
     });
 
     socket.on(Actions.FILE.ADD, async ({ roomId, file }) => {
       await redis.hset(`room:${roomId}:files`, file, "");
       const files = await redis.hgetall(`room:${roomId}:files`)
-      socket.in(roomId).emit(Actions.FILE.SYNC, files)
+      socket.in(roomId).emit(Actions.FILE.SYNC, Object.keys(files))
+    })
+
+    socket.on(Actions.FILE.OPEN, async ({ roomId, file }) => {
+      const code = await redis.hget(`room:${roomId}:files`, file)
+      socket.emit(Actions.FILE.OPEN, { code, file })
     })
 
     socket.on(Actions.FILE.DELETE, async ({ roomId, file }) => {
-      await redis.hdel(`room:${roomId}:files`, file, "");
-      const files = await redis.hgetall(`room:${roomId}:files`)
-      socket.in(roomId).emit(Actions.FILE.SYNC, files)
-    })
-
-    socket.on(Actions.FILE.RENAME, async ({ roomId, oldFile, newFile }) => {
-      const content = await redis.hget(`room:${roomId}:files`, oldFile)
-      await redis.hdel(`room:${roomId}:files`, oldFile)
-      await redis.hset(`room:${roomId}:files`, newFile, content);
-
-      const files = await redis.hgetall(`room:${roomId}:files`)
-      socket.in(roomId).emit(Actions.FILE.SYNC, files)
+      await redis.hdel(`room:${roomId}:files`, file);
+      let files = await redis.hgetall(`room:${roomId}:files`)
+      socket.in(roomId).emit(Actions.FILE.SYNC, Object.keys(files))
     })
 
     socket.on(Actions.SEND_CHAT, ({ roomId, message, username }) => {

@@ -9,6 +9,15 @@ export const Actions = {
   CHAT: "chat",
   CURSOR_CHANGE: "cursor-change",
   LANGUAGE_CHANGE: "language-change",
+  KICK: "kick",
   KICK_USER: "kick_user",
   KICKED: "kicked",
+  FILE: {
+    ADD: "add-file",
+    DELETE: "delete-file",
+    RENAME: "rename-file",
+    SYNC: "sync-file",
+    OPEN: "open-file"
+  }
 };
+

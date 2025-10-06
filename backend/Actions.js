@@ -15,8 +15,8 @@ const Actions = {
   FILE: {
     ADD: "add-file",
     DELETE: "delete-file",
-    RENAME: "rename-file",
-    SYNC: "sync-file"
+    SYNC: "sync-file",
+    OPEN: "open-file"
   }
 };
 

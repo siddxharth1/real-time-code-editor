@@ -1,4 +1,4 @@
-import  { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Navigate,
   useLocation,
@@ -29,11 +29,17 @@ import {
 import { IoClose } from "react-icons/io5";
 import { motion, AnimatePresence } from "framer-motion";
 import { addToast } from "@heroui/toast";
+import { TbTrash } from "react-icons/tb";
+import AddNewFile from "../components/AddNewFile";
 
 const EditorPage = () => {
   const socketRef = useRef(null);
   const codeRef = useRef(null);
   const drawingBoardData = useRef(null);
+
+  const [files, setFiles] = useState([])
+  const [currFile, setCurrFile] = useState("")
+  const [code, setCode] = useState("");
 
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
 
@@ -100,6 +106,31 @@ const EditorPage = () => {
         deviceInfo: location.state?.deviceInfo
       });
 
+      socketRef.current.on(Actions.FILE.SYNC, (data) => {
+        setFiles(data)
+        if (data.length == 0) {
+          reactNavigator("/")
+          return
+        }
+        if (currFile == "") {
+          setCurrFile(data[0])
+          socketRef.current.emit(Actions.FILE.OPEN, {
+            file: data[0],
+            roomId
+          })
+        }
+      })
+
+      socketRef.current.on(Actions.FILE.OPEN, ({ file, code }) => {
+        setCode(code)
+        setCurrFile(file)
+      })
+
+      socketRef.current.emit(Actions.FILE.SYNC, {
+        newClientSocket: socketRef.current.id,
+        roomId
+      })
+
       socketRef.current.on(Actions.JOINED, (data) => {
         setClients(data.clients);
         setAdminInfo(data.admin);
@@ -110,7 +141,7 @@ const EditorPage = () => {
         }
 
         if (data.socketId === socketRef.current.id) return;
-        
+
         console.log(data);
         addToast({
           title: `${data.username} joined the room`,
@@ -133,7 +164,7 @@ const EditorPage = () => {
       });
 
       socketRef.current.on(Actions.KICKED, () => {
-        
+
         addToast({
           title: "You have been kicked from the room by the admin",
           type: "error",
@@ -148,6 +179,7 @@ const EditorPage = () => {
       socketRef.current.off(Actions.JOINED);
       socketRef.current.off(Actions.DISCONNECTED);
       socketRef.current.off(Actions.KICKED);
+      socketRef.current.off(Actions.FILE.SYNC);
     };
   }, []);
 
@@ -159,12 +191,26 @@ const EditorPage = () => {
     return <Navigate to="/" />;
   }
 
-  const handleLinkCopy = ()=>{
+  const handleLinkCopy = () => {
     navigator.clipboard.writeText(`${window.location.origin}/join?roomId=${roomId}`);
     addToast({
       title: "Link copied to clipboard",
       type: "success",
     });
+  }
+
+  const handleAddNewFile = (newFile) => {
+    setFiles((prev) => [...prev, newFile])
+    socketRef.current.emit(Actions.FILE.ADD, { file: newFile, roomId })
+  }
+
+  const handleDeleteFile = (file) => {
+    setFiles((prev) => prev.filter(val => val != file))
+    socketRef.current.emit(Actions.FILE.DELETE, { file, roomId })
+    if (Object.keys(files).length == 1) reactNavigator("/")
+    if (file == currFile) {
+      setCurrFile(files[Object.keys(files)[0]])
+    }
   }
 
   return (
@@ -216,9 +262,9 @@ const EditorPage = () => {
                               </div>
                             </div>
                             {isAdmin && client.socketId !== socketRef.current.id && (
-                              <Button 
-                                color="danger" 
-                                size="sm" 
+                              <Button
+                                color="danger"
+                                size="sm"
                                 variant="flat"
                                 onClick={() => handleKickUser(client.socketId)}
                               >
@@ -242,7 +288,7 @@ const EditorPage = () => {
               >
                 {clients.map((client) => (
                   <Tooltip content={client.username} key={client.username}>
-                    <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d"  onClick={onOpen} />
+                    <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" onClick={onOpen} />
                   </Tooltip>
                 ))}
               </AvatarGroup>
@@ -251,7 +297,7 @@ const EditorPage = () => {
           <div className="flex gap-3">
             <Snippet symbol="Room id:">{roomId}</Snippet>
             <Button onClick={handleLinkCopy} isIconOnly>
-            <FiLink />
+              <FiLink />
             </Button>
             <Button color="danger" onClick={leaveRoomHandler}>
               Leave room
@@ -264,12 +310,30 @@ const EditorPage = () => {
           username={location.state?.username}
         />
       </aside>
-      <main>
+      <main className="flex gap-3 h-[85vh]">
+        <div className="flex flex-col border-r border-zinc-600 pr-3 min-w-[15vw] text-center">
+          <AddNewFile action={handleAddNewFile} />
+          {
+            files.map((file) => (
+              <div key={file} className={`m-0 flex items-center justify-between cursor-pointer ${file === currFile ? "bg-white/20" : "bg-white/10"} p-2 rounded hover:bg-white/20 transition-colors duration-300`} onClick={() => {
+                socketRef.current.emit(Actions.FILE.OPEN, {
+                  file,
+                  roomId
+                })
+              }}>
+                {file}
+                <TbTrash onClick={() => handleDeleteFile(file)} className="hover:bg-red-50 text-red-400 p-1 rounded transition-colors size-6" />
+              </div>
+            ))
+          }
+        </div>
         <CodeEditor
           socketRef={socketRef}
           roomId={roomId}
           onCodeChange={(code) => (codeRef.current = code)}
           username={location.state?.username}
+          currFile={currFile}
+          defaultValue={code || ""}
         />
       </main>
 
