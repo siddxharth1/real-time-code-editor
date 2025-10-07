@@ -12,6 +12,12 @@ const Actions = {
   KICK: "kick",
   KICK_USER: "kick_user",
   KICKED: "kicked",
+  FILE: {
+    ADD: "add-file",
+    DELETE: "delete-file",
+    SYNC: "sync-file",
+    OPEN: "open-file"
+  }
 };
 
 module.exports = Actions;

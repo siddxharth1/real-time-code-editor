@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import Editor from "@monaco-editor/react";
 import LanguageSelector from "./LanguageSelector";
-import { Code_Snippets } from "../constants";
 import { Actions } from "../Action";
 import CodeOutput from "./CodeOutput";
 
@@ -11,8 +10,8 @@ import { Button } from "@nextui-org/react";
 import { RxEnterFullScreen, RxExitFullScreen } from "react-icons/rx";
 import { IoCodeDownloadOutline } from "react-icons/io5";
 
-const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
-  const [value, setValue] = useState(null);
+const CodeEditor = ({ socketRef, roomId, onCodeChange, username, currFile, defaultValue }) => {
+  const [value, setValue] = useState(defaultValue);
   const [language, setLanguage] = useState({
     language: "javascript",
     version: "18.15.0",
@@ -23,11 +22,25 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
   const decorationsRef = useRef([]);
   const [isFullScreen, setIsFullScreen] = useState(false);
 
+  const currFileRef = useRef(currFile);
+  const valueRef = useRef(value);
+
+  useEffect(() => { currFileRef.current = currFile; }, [currFile]);
+  useEffect(() => { valueRef.current = value; }, [value]);
+
+  useEffect(() => {
+    setValue(defaultValue)
+  }, [defaultValue, currFile])
+
+  console.log(currFile, "currFile in editor")
+
   useEffect(() => {
     if (socketRef.current) {
-      socketRef.current.on(Actions.CODE_CHANGE, ({ code }) => {
+      socketRef.current.on(Actions.CODE_CHANGE, ({ code, file }) => {
+        console.log("CODE CHANGE Incoming", currFile);
         if (code === null) return;
-        if (code === value) return;
+        if (code === valueRef.current) return;
+        if (file !== currFileRef.current) return;
         setValue(code);
       });
 
@@ -37,8 +50,14 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
 
       socketRef.current.on(Actions.LANGUAGE_CHANGE, ({ language }) => {
         setLanguage(language);
-        setValue(Code_Snippets[language?.language] || "");
+        // setValue(Code_Snippets[language?.language] || "");
       });
+
+      socketRef.current.emit(Actions.FILE.SYNC, {
+        newClientSocket: socketRef.current.id,
+        roomId
+      })
+
     }
 
     return () => {
@@ -80,24 +99,26 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
   }, [remoteCursors]);
 
   useEffect(() => {
-    let timer;
+    if (!socketRef.current) return;
+    if (!currFile) return; // don't emit if file is empty
 
-    timer = setTimeout(() => {
+    const id = setTimeout(() => {
       onCodeChange(value);
+      // double-check current file ref before emitting
+      const current = currFileRef.current;
+      if (!current) return;
       socketRef.current.emit(Actions.CODE_CHANGE, {
         roomId,
         code: value,
+        file: current,
       });
     }, 300);
 
-    return () => {
-      clearTimeout(timer);
-    };
-  }, [value]);
+    return () => clearTimeout(id);
+  }, [value, currFile, roomId, onCodeChange, socketRef]);
 
   const onLanguageChange = (language) => {
     setLanguage(language);
-    setValue(Code_Snippets[language?.language] || "");
     socketRef.current.emit(Actions.LANGUAGE_CHANGE, {
       roomId,
       language,
@@ -137,7 +158,7 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
 
   const [sizes, setSizes] = useState([400, "30%", "auto"]);
 
-  const handleDownloadCode = ()=>{
+  const handleDownloadCode = () => {
     const code = editorRef.current.getValue();
     const blob = new Blob([code], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
@@ -147,7 +168,7 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
     a.click();
   }
   return (
-    <div className="border-1 border-zinc-600 rounded-xl bg-neutral-900">
+    <div className="border-1 border-zinc-600 rounded-xl bg-neutral-900 w-full">
       <div className="p-2 flex justify-between">
         <LanguageSelector
           language={language}
@@ -171,7 +192,7 @@ const CodeEditor = ({ socketRef, roomId, onCodeChange, username }) => {
               height="80vh"
               theme="vs-dark"
               language={language?.language}
-              defaultValue={Code_Snippets[language?.language]}
+              defaultValue={value}
               value={value}
               onMount={(editor, monaco) => {
                 editorRef.current = editor;
