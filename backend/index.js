@@ -1,11 +1,12 @@
-require("dotenv").config();
-const http = require("http");
-const { Server } = require("socket.io");
-const express = require("express");
+import dotenv from "dotenv";
+dotenv.config();
+import http from "http";
+import { Server } from "socket.io";
+import express from "express";
 
-const socketController = require("./socketController");
-const redis = require("./services/redis");
-const { createAdapter } = require("@socket.io/redis-streams-adapter");
+import socketController from "./socketController.js";
+import redis from "./services/redis.js";
+import { createAdapter } from "@socket.io/redis-streams-adapter";
 
 const app = express();
 const server = http.createServer(app);

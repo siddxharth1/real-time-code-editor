@@ -128,6 +128,21 @@ docker run -d --name redis-server -p 6379:6379 redis:latest redis-server --requi
 
 ### Development Mode
 
+#### One command (recommended)
+
+From the repository root, install and run both servers together:
+
+```bash
+npm install
+npm run dev
+```
+
+This starts:
+- Backend on http://localhost:3000
+- Frontend on http://localhost:5173
+
+If you'd like to run them separately, see the steps below.
+
 #### 1. Start Redis
 
 Make sure Redis is running.
@@ -191,32 +206,7 @@ npm run preview
 
 We welcome contributions! Please follow these steps:
 
-### Before You Start
-
-1. **Check Existing Issues**: Browse through [existing issues](https://github.com/siddxharth1/real-time-code-editor/issues) to avoid duplicating work
-2. **Create an Issue**: Before starting any work, create an issue describing:
-   - The feature you want to add
-   - The bug you want to fix
-   - The improvement you want to make
-3. **Wait for Assignment**: Don't start working until a maintainer assigns the issue to you
-4. **Discuss**: Use the issue comments to discuss implementation details
-
-### Development Process
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/issue-number-description`
-3. Commit your changes: `git commit -m 'Fix #123: Add amazing feature'`
-4. Push to the branch: `git push origin feature/issue-number-description`
-5. Open a Pull Request referencing the issue
-
-### Development Guidelines
-
-- Follow the existing code style
-- Add comments for complex logic
-- Test your changes thoroughly
-- Update documentation if needed
-- Reference the issue number in your commits and PR
-- Ensure builds pass: Run `npm run build` in both frontend & backend directories
+If you’re new here, please start with our full guide in `CONTRIBUTING.md` for branch naming, commit conventions, and the PR process.
 
 ## 🌟 Acknowledgments
 
