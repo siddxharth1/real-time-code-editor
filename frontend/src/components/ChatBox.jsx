@@ -91,7 +91,7 @@ const ChatBox = ({ socketRef, roomId, username }) => {
         )}
       </div> */}
       <Popover offset={10}>
-        <PopoverTrigger className="absolute bottom-5 right-5">
+        <PopoverTrigger className="absolute bottom-24 right-5">
           <Button
             color="secondary"
             variant="flat"
